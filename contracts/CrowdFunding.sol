@@ -9,6 +9,18 @@ contract CrowdFunding {
     uint public deadline; // timestamp
     uint public goal;
     uint public raisedAmount;
+    struct Request {
+        string description;
+        address payable recipient;
+        uint value;
+        bool completed; 
+        uint numOfVoters;
+        mapping(address => bool) voters;
+    }
+
+    mapping(uint => Request) public requests;
+
+    uint public numRequests;
 
     constructor(uint _goal, uint _deadline){
         goal = _goal;
@@ -48,5 +60,21 @@ contract CrowdFunding {
         // payable(msg.sender).transfer(contributors[msg.sender]);
 
         contributors[msg.sender] = 0;
+    }
+
+    modifier onlyAdmin(){
+        require(msg.sender == admin, "Only admin can call this function");
+        _;
+    }
+
+    function createRequest(string memory _description, address payable _recipient, uint _value) public onlyAdmin{
+        Request storage newRequest = requests[numRequests];
+        numRequests++;
+
+        newRequest.description = _description;
+        newRequest.recipient = _recipient;
+        newRequest.value = _value;
+        newRequest.completed = false;
+        newRequest.numOfVoters = 0;
     }
 }
