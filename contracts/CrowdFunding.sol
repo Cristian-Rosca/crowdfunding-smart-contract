@@ -13,7 +13,7 @@ contract CrowdFunding {
         string description;
         address payable recipient;
         uint value;
-        bool completed; 
+        bool isCompleted; 
         uint numOfVoters;
         mapping(address => bool) voters;
     }
@@ -74,7 +74,7 @@ contract CrowdFunding {
         newRequest.description = _description;
         newRequest.recipient = _recipient;
         newRequest.value = _value;
-        newRequest.completed = false;
+        newRequest.isCompleted = false;
         newRequest.numOfVoters = 0;
     }
 
@@ -86,4 +86,14 @@ contract CrowdFunding {
         thisRequest.voters[msg.sender] = true;
         thisRequest.numOfVoters++;
     }
+
+    function makePayment(uint _requestNo) public onlyAdmin{
+        require(raisedAmount >= goal);
+        Request storage thisRequest = requests[_requestNo]; 
+        require(thisRequest.isCompleted == false, "The request has already been isCompleted");
+        require(thisRequest.numOfVoters > (numOfContributors / 2)); // 50% of contributors must have voted in favour of the request
+        
+        thisRequest.recipient.transfer(thisRequest.value);
+        thisRequest.isCompleted = true; 
+    } 
 }
